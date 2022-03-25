@@ -1,5 +1,4 @@
-#ifndef FLIPPY_DEBUG_UTILS_H
-#define FLIPPY_DEBUG_UTILS_H
+#pragma once
 #include <iostream>
 #include <chrono>
 #include <ctime>
@@ -139,4 +138,3 @@ public:
 };
 
 }
-#endif
