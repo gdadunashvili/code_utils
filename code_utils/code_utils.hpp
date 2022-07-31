@@ -7,19 +7,19 @@
 namespace cutils {
 
 #if LOGGING_ON
-#define LOGN(x) std::cout<< #x <<": "; print(x)
+#define LOGN(x) std::cout<< #x <<": "; cutils::print(x)
 #else
 #define LOGN(x)
 #endif
 
 #if LOGGING_ON
-#define LOG(...) print(__VA_ARGS__)
+#define LOG(...) cutils::print(__VA_ARGS__)
 #else
 #define LOG(...);
 #endif
 
 #if PRINTING_ON
-#define PRINT(...) print(__VA_ARGS__)
+#define PRINT(...) cutils::print(__VA_ARGS__)
 #else
 #define PRINT(...)
 #endif
