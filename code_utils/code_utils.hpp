@@ -62,6 +62,9 @@ template<typename Tfirst, typename... Trest>
     print(rest...);
 }
 
+/**
+ * given a time difference in the highest clock resolution this struct constructs a human readable string of elapsed time.
+ */
 static HumanReadableTime human_readable_time(unsigned long long diff){
     std::string unit;
     std::string unit_fine;
@@ -103,7 +106,7 @@ static HumanReadableTime human_readable_time(unsigned long long diff){
 class Timer
 {
 /**
- * this class keeps time form its creation to destrtuction. I.e. it can
+ * this class keeps time form its creation to destruction. I.e. it can
  * time the duration of a scope.
  *
  * */
