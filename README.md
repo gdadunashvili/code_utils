@@ -1,2 +1,2 @@
 # code_utils
-A colection of c++20 functions that are usefull during code development
+A collection of c++20 functions that are useful during code development. Documentation can be found [here](https://gdadunashvili.github.io/code_utils/index.html).
