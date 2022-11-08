@@ -25,9 +25,7 @@
 var NAVTREE =
 [
   [ "code_utils", "index.html", [
-    [ "bla", "md_demos_main.html", [
-      [ "code_utils", "md_demos_main.html#autotoc_md1", null ]
-    ] ],
+    [ "code_utils", "md_demos_main.html", null ],
     [ "print demo", "md_demos_print.html", null ],
     [ "print demo", "md_demos__timer.html", null ],
     [ "Namespaces", "namespaces.html", [

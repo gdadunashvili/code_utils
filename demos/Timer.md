@@ -14,5 +14,4 @@ int main()
     // elapsed time: 792 ns (792)
     return 0;
 }
-}
 ```

@@ -1,4 +1,4 @@
 var searchData=
 [
-  ['restart_0',['restart',['../classcutils_1_1_timer.html#ade00e56bd0f52157df898b34988bd5b0',1,'cutils::Timer']]]
+  ['stop_0',['stop',['../classcutils_1_1_timer.html#a0a73c37e989e2a37ee5372d3bb9a015d',1,'cutils::Timer']]]
 ];

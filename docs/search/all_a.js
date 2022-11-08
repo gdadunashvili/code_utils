@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['unit_0',['unit',['../structcutils_1_1_human_readable_time.html#aaa20bfbb60c3d2e49a0b0cfe0413837b',1,'cutils::HumanReadableTime']]],
-  ['unit_5ffine_1',['unit_fine',['../structcutils_1_1_human_readable_time.html#a5539da71ba2cf2093250495f15828e81',1,'cutils::HumanReadableTime']]]
+  ['_7etimer_0',['~Timer',['../classcutils_1_1_timer.html#aae4b109a69606206a97655f2d7fe82d1',1,'cutils::Timer']]]
 ];

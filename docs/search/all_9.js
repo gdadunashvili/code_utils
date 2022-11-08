@@ -1,5 +1,5 @@
 var searchData=
 [
-  ['timer_0',['Timer',['../classcutils_1_1_timer.html',1,'cutils::Timer'],['../classcutils_1_1_timer.html#a5d45092a4b3a216ab91ffbfc3431ea95',1,'cutils::Timer::Timer()']]],
-  ['timer_2emd_1',['Timer.md',['../_timer_8md.html',1,'']]]
+  ['unit_0',['unit',['../structcutils_1_1_human_readable_time.html#aaa20bfbb60c3d2e49a0b0cfe0413837b',1,'cutils::HumanReadableTime']]],
+  ['unit_5ffine_1',['unit_fine',['../structcutils_1_1_human_readable_time.html#a5539da71ba2cf2093250495f15828e81',1,'cutils::HumanReadableTime']]]
 ];
