@@ -3,6 +3,9 @@
 #include <chrono>
 #include <ctime>
 #include <utility>
+#include <type_traits>
+#include <concepts>
+#include <sstream>
 
 namespace cutils {
 
@@ -24,13 +27,48 @@ namespace cutils {
 #define PRINT(...)
 #endif
 
-static void print();
 
-template<template<typename, typename> typename C, typename T>
-static void print(const C<T, std::allocator<T>>& output);
+template<typename C> concept Beginable= requires(C c) {std::begin(c);};
+template<typename C> concept Endable= requires(C c) {std::end(c);};
+template<typename C> concept NeqableBeginAndEnd = requires(C c) {{std::begin(c) != std::end(c)} -> std::same_as<bool>;};
+template<typename C> concept BeginIncrementable = requires(C c) {std::begin(c)++;};
+template<typename C> concept BeginDerefable = requires(C c) {*std::begin(c);};
+template<typename C> concept BeginDerefToVoid = requires(C c) {{*std::begin(c)} -> std::same_as<void>;};
+template<typename C> concept BeginAndEndCopyConstructibleAndDestructible = requires(C c) {
+  std::destructible<decltype(std::begin(c))> &&
+      std::destructible<decltype(std::end(c))> &&
+      std::copy_constructible<decltype(std::begin(c))> &&
+      std::copy_constructible<decltype(std::end(c))>;
+};
 
-template<typename Tfirst, typename... Trest>
-static void print(const Tfirst& first, const Trest& ... rest);
+
+template<typename C> concept Container =
+Beginable<C> &&
+    Endable<C> &&
+    NeqableBeginAndEnd<C> &&
+    BeginIncrementable<C> &&
+    BeginDerefable<C> &&
+    !BeginDerefToVoid<C> &&
+    BeginAndEndCopyConstructibleAndDestructible<C>;
+
+template<typename T> concept StdOutStreamable = requires(T t) {std::cout << t;};
+template<typename T> concept OutStreamable = requires(std::ostream os, T t) {os << t;};
+template<typename T> concept InStreamable = requires(std::istream os, T t) {os >> t;};
+
+template<typename T> concept Printable = StdOutStreamable<T> || Container<T>;
+
+
+
+//template<typename C> concept ContainerOfStreamables =
+//  Container<C> &&
+
+template<char sep, char end> static void print();
+template<char sep, char end> static void print(Container auto const & output);
+//template<char sep, char end> static void print(Streamable auto const & output);
+template<char sep, char end> static void print(Printable auto const & first, Printable auto const & ... rest);
+
+//template<typename Tfirst, typename... Trest>
+//static void print(const Tfirst& first, const Trest& ... rest);
 
 struct HumanReadableTime{
   std::string unit;
@@ -42,18 +80,26 @@ struct HumanReadableTime{
 
 // ------------------------ IMPLEMENTATIONS ---------------------------- //
 
-[[maybe_unused]] void print() { std::cout << '\n'; }
 
-template<template<typename, typename> typename C, typename T>
-[[maybe_unused]] void print(const C<T, std::allocator<T>>& output)
+
+template<char sep=' ', char end='\n'>
+[[maybe_unused]] void print() { std::cout << end; }
+
+template<char sep=' ', char end='\n'>
+[[maybe_unused]] void print(Container auto const & output)
 {
-    std::cout << "{";
-    auto last = output.size() - 1;
-    for (unsigned long i = 0; i<last; ++i) {
-        std::cout << output[i] << ", ";
+  print<sep, ' '>('{');
+  auto const & last_elem = *(output.end()-1);
+  for (const auto& elem : output) {
+    if (elem != last_elem){
+      print<sep, ' '>(elem, ',');
     }
-    std::cout << output[last] << "}" << std::endl;
+    else{
+      print<sep, end>(elem, '}');
+    }
+  }
 }
+
 
 /**
  * Print function that can take an arbitrary number of arguments. It was implemented to work similarly to Pythons print function.
@@ -66,11 +112,18 @@ template<template<typename, typename> typename C, typename T>
  * @attention can not handle containers of containers.
  * @warning if a container of zero length is provided the code will crush.
  */
-template<typename Tfirst, typename... Trest>
-[[maybe_unused]] void print(const Tfirst& first, const Trest& ... rest)
+//template<typename Tfirst, typename... Trest>
+//[[maybe_unused]] void print(const Tfirst& first, const Trest& ... rest)
+template<char sep=' ', char end='\n'>
+[[maybe_unused]] void print(Printable auto const & first, Printable auto const & ... rest)
 {
-    std::cout << first << ' ';
-    print(rest...);
+  if constexpr (StdOutStreamable<decltype(first)>){
+      std::cout<<first<<sep;
+  }
+  else{
+      print<sep, ' '>(first);
+  }
+  print<sep, end>(rest...);
 }
 
 /**
@@ -150,5 +203,96 @@ public:
 
     ~Timer() { if(not stopped){stop();} }
 };
+
+
+template<typename G>
+concept UniformRandomBitGenerator = requires(G g) {
+  typename G::result_type; // Must have result_type
+  { G::min() } -> std::same_as<typename G::result_type>; // min function
+  { G::max() } -> std::same_as<typename G::result_type>; // max function
+  { g() } -> std::same_as<typename G::result_type>; // operator()
+  requires std::is_unsigned_v<typename G::result_type>; // result_type is unsigned integer type
+  requires G::min() < G::max(); // min is strictly less than max
+};
+
+
+template <typename E>
+concept RandomNumberEngine = requires(E e, const E x, const E y, typename E::result_type s, unsigned long long z, std::ostream& os, std::istream& is) {
+  typename E::result_type;
+  { E() } -> std::same_as<E>;
+  { E(x) } -> std::same_as<E>;
+  { E(s) } -> std::same_as<E>;
+  { e.seed() } -> std::same_as<void>;
+  { e.seed(s) } -> std::same_as<void>;
+  { e() } -> std::same_as<typename E::result_type>;
+  { e.discard(z) } -> std::same_as<void>;
+  { x == y } -> std::same_as<bool>;
+  { x != y } -> std::same_as<bool>;
+  { os << x } -> std::same_as<std::ostream&>;
+  { is >> e } -> std::same_as<std::istream&>;
+  { E::min() } -> std::same_as<typename E::result_type>;
+  { E::max() } -> std::same_as<typename E::result_type>;
+};
+
+
+// source https://en.wikipedia.org/wiki/Xorshift#xoshiro_and_xoroshiro
+//template<typename ResultType=uint32_t>
+//requires std::is_integral<ResultType>::value
+//requires std::is_same_v<ResultType, uint32_t>
+class xorshift32
+{
+  using ResultType = uint32_t;
+  ResultType seed_;
+public:
+  typedef ResultType result_type;
+
+  xorshift32(): seed_(12) { }
+
+  explicit xorshift32(ResultType seed_): seed_(seed_) { }
+
+  /* The state word must be initialized to non-zero */
+  ResultType operator()()
+  {
+    /* Algorithm "xor" from p. 4 of Marsaglia, "Xorshift RNGs" */
+    ResultType x = seed_;
+    x ^= x << 13;
+    x ^= x >> 17;
+    x ^= x << 5;
+    return seed_ = x;
+  }
+  void discard(long long z)
+  {
+    for (long long i = 0; i<z; ++i) {
+      (*this)();
+    }
+  }
+  constexpr static ResultType min() { return std::numeric_limits<ResultType>::min(); }
+  constexpr static ResultType max() { return std::numeric_limits<ResultType>::max(); }
+
+  void seed(){*this = xorshift32();}
+  void seed(ResultType seed_inp){*this = xorshift32(seed_inp);}
+
+  bool operator==(xorshift32 const& rhs) const{
+    return seed_==rhs.seed_;
+  }
+  bool operator!=(xorshift32 const& rhs) const{
+    return seed_!=rhs.seed_;
+  }
+
+
+  friend auto operator<<( std::ostream& os, xorshift32 const& rng) -> std::ostream& {
+    os.flags(std::ostream::dec | std::ostream::skipws);
+    os << rng.seed_;
+    return os;
+  }
+
+  friend auto operator>>(std::istream& is, xorshift32 & rng) -> std::istream & {
+    is.flags(std::istream::dec | std::istream::skipws);
+    is >> rng.seed_;
+    return is;
+  }
+
+};
+
 
 }

@@ -1,5 +1,7 @@
 .idea
 cmake-build*
+build/
+.cache/
 CMakeLists.txt
 tests
 .DS_Store
