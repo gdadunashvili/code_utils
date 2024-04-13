@@ -2,5 +2,7 @@
 cmake-build*
 CMakeLists.txt
 tests
+.DS_Store
+Doxyfile.in
 
 

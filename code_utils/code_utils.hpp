@@ -55,6 +55,17 @@ template<template<typename, typename> typename C, typename T>
     std::cout << output[last] << "}" << std::endl;
 }
 
+/**
+ * Print function that can take an arbitrary number of arguments. It was implemented to work similarly to Pythons print function.
+ * @tparam Tfirst Type of the first argument (automatically deduced)
+ * @tparam Trest Type of the remaining part of the variadic number of arguments (automatically deduced)
+ * @param first First argument
+ * @param rest rest of the variadic arguments
+ * @returns nothing.
+ * @see print(const C<T, std::allocator<T>>& output)
+ * @attention can not handle containers of containers.
+ * @warning if a container of zero length is provided the code will crush.
+ */
 template<typename Tfirst, typename... Trest>
 [[maybe_unused]] void print(const Tfirst& first, const Trest& ... rest)
 {
@@ -62,6 +73,9 @@ template<typename Tfirst, typename... Trest>
     print(rest...);
 }
 
+/**
+ * given a time difference in the highest clock resolution this struct constructs a human readable string of elapsed time.
+ */
 static HumanReadableTime human_readable_time(unsigned long long diff){
     std::string unit;
     std::string unit_fine;
@@ -103,7 +117,7 @@ static HumanReadableTime human_readable_time(unsigned long long diff){
 class Timer
 {
 /**
- * this class keeps time form its creation to destrtuction. I.e. it can
+ * this class keeps time form its creation to destruction. I.e. it can
  * time the duration of a scope.
  *
  * */
