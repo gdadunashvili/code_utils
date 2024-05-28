@@ -58,17 +58,10 @@ template<typename T> concept InStreamable = requires(std::istream os, T t) {os >
 template<typename T> concept Printable = StdOutStreamable<T> || Container<T>;
 
 
-
-//template<typename C> concept ContainerOfStreamables =
-//  Container<C> &&
-
 template<char sep, char end> static void print();
 template<char sep, char end> static void print(Container auto const & output);
-//template<char sep, char end> static void print(Streamable auto const & output);
 template<char sep, char end> static void print(Printable auto const & first, Printable auto const & ... rest);
 
-//template<typename Tfirst, typename... Trest>
-//static void print(const Tfirst& first, const Trest& ... rest);
 
 struct HumanReadableTime{
   std::string unit;
