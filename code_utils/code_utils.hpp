@@ -2,10 +2,8 @@
 #include <iostream>
 #include <chrono>
 #include <ctime>
-#include <utility>
 #include <type_traits>
 #include <concepts>
-#include <sstream>
 
 namespace cutils {
 
@@ -66,9 +64,9 @@ template<char sep, char end> static void print(Printable auto const & first, Pri
 struct HumanReadableTime{
   std::string unit;
   std::string unit_fine;
-  unsigned long long diff;
-  unsigned long long diff_fine;
-  unsigned long long diff_ns;
+  long long diff;
+  long long diff_fine;
+  long long diff_ns;
 };
 
 // ------------------------ IMPLEMENTATIONS ---------------------------- //
@@ -122,39 +120,40 @@ template<char sep=' ', char end='\n'>
 /**
  * given a time difference in the highest clock resolution this struct constructs a human readable string of elapsed time.
  */
-static HumanReadableTime human_readable_time(unsigned long long diff){
+static HumanReadableTime human_readable_time(long long diff){
     std::string unit;
     std::string unit_fine;
-    unsigned long long diff_ns = diff;
-    unsigned long long diff_fine = diff;
-    if (diff/(1.e3l)<1.l) { unit = " ns"; }
-    else if (diff/1.e6l<1.l) {
+    long long diff_ns = diff;
+    long long diff_fine = diff;
+    double diff_d = static_cast<double>(diff);
+    if (diff_d/(1.e3l)<1.l) { unit = " ns"; }
+    else if (diff_d/1.e6<1.) {
         unit = " µs";
-        diff /= 1.e3l;
+        diff /= 1000;
     }
-    else if (diff/1.e9l<1.l) {
+    else if (diff_d/1.e9<1.) {
         unit = " ms";
-        diff /= 1.e6l;
+        diff /= 1000'000ll;
         unit_fine = " µs";
-        diff_fine /= 1.e3l;
+        diff_fine /= 1000ll;
     }
-    else if (diff/(1.e9l*60.l)<1.l) {
+    else if (diff_d/(1.e9l*60.l)<1.l) {
         unit = " s";
-        diff /= 1e9l;
+        diff /= 1000'000'000ll;
         unit_fine = " ms";
-        diff_fine /= 1e6l;
+        diff_fine /= 1000'000ll;
     }
-    else if (diff/(1.e9l*3600.l)<1.l) {
+    else if (diff_d/(1.e9*3600.)<1.) {
         unit = " m";
-        diff /= 6.e10l;
+        diff /= 60'000'000'000ll;
         unit_fine = " s";
-        diff_fine /= 1.e9l;
+        diff_fine /= 1000'000'000ll;
     }
     else {
         unit = " h";
-        diff /= 36.e11l;
+        diff /= 3600'000'000'000ll;
         unit_fine = " m";
-        diff_fine /= 6.e10l;
+        diff_fine /= 60'000'000ll;
     }
     return {.unit=unit, .unit_fine=unit_fine, .diff=diff,
             .diff_fine=diff_fine, .diff_ns=diff_ns};
@@ -181,8 +180,7 @@ public:
     HumanReadableTime stop()
     {
         Now = Clock::now();
-        unsigned long long diff_ = std::chrono::duration_cast<std::chrono::nanoseconds>
-                (Now - Start).count();
+        long long diff_ = std::chrono::duration_cast<std::chrono::nanoseconds>(Now - Start).count();
 
         HumanReadableTime hrt = human_readable_time(diff_);
 
